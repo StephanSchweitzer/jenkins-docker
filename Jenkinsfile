@@ -1,29 +1,65 @@
 pipeline {
-    agent any 
-    environment {
-    DOCKERHUB_CREDENTIALS = credentials('karim-dockerhub')
-    }
-    stages { 
+    agent any
 
-        stage('Build docker image') {
-            steps {  
-                sh 'docker build -t myapp/flask:$BUILD_NUMBER .'
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('karim-dockerhub')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']],
+                    userRemoteConfigs: [[url: 'https://github.com/StephanSchweitzer/jenkins-docker']]
+                ])
             }
         }
-        stage('login to dockerhub') {
-            steps{
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    def buildCommand = 'docker build -t stephanschweitzer/myapp-flask:latest .'
+                    if (isUnix()) {
+                        sh buildCommand
+                    } else {
+                        bat buildCommand
+                    }
+                }
             }
         }
-        stage('push image') {
-            steps{
-                sh 'docker push myapp/flask:$BUILD_NUMBER'
+        stage('Login to DockerHub') {
+            steps {
+                script {
+                    def loginCommand = 'echo docker login -u stephanschweitzer -p Kierkegaard2014!'
+                    if (isUnix()) {
+                        sh loginCommand
+                    } else {
+                        bat 'echo docker login -u stephanschweitzer -p Kierkegaard2014!'
+                    }
+                }
             }
         }
-}
-post {
+        stage('Push Image to DockerHub') {
+            steps {
+                script {
+                    def pushCommand = 'docker push stephanschweitzer/myapp-flask:latest'
+                    if (isUnix()) {
+                        sh pushCommand
+                    } else {
+                        bat pushCommand
+                    }
+                }
+            }
+        }
+    }
+    post {
         always {
-            sh 'docker logout'
+            script {
+                def cleanupCommand = 'docker rmi stephanschweitzer/myapp-flask:latest'
+                if (isUnix()) {
+                    sh cleanupCommand
+                } else {
+                    bat cleanupCommand
+                }
+            }
         }
     }
 }
