@@ -7,7 +7,7 @@ pipeline {
 
         stage('Build docker image') {
             steps {  
-                bat 'docker build -t myapp/flask:latest .'
+                bat 'docker build -t stephanschweitzer/myapp-flask:latest .'
             }
         }
         stage('login to dockerhub') {
@@ -17,7 +17,7 @@ pipeline {
         }
         stage('push image') {
             steps{
-                bat 'docker push myapp/flask:latest'
+                bat 'docker push stephanschweitzer/myapp-flask:latest'
             }
         }
 }
