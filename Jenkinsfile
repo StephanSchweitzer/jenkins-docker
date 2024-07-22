@@ -10,7 +10,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    git credentialsId: 'github-credentials-id', url: 'https://github.com/StephanSchweitzer/jenkins-docker'
+                    git credentialsId: 'stef-git', url: 'https://github.com/StephanSchweitzer/jenkins-docker'
                 }
             }
         }
