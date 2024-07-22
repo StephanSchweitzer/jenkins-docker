@@ -3,14 +3,15 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('karim-dockerhub')
+        GITHUB_CREDENTIALS = credentials('stef-git')
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']],
-                    userRemoteConfigs: [[url: 'https://github.com/StephanSchweitzer/jenkins-docker']]
-                ])
+                script {
+                    git credentialsId: 'github-credentials-id', url: 'https://github.com/StephanSchweitzer/jenkins-docker'
+                }
             }
         }
         stage('Build Docker Image') {
@@ -32,7 +33,7 @@ pipeline {
                     if (isUnix()) {
                         sh loginCommand
                     } else {
-                        bat 'echo docker login -u stephanschweitzer -p Kierkegaard2014!'
+                        bat "echo docker login -u stephanschweitzer -p Kierkegaard2014!"
                     }
                 }
             }
